@@ -74,7 +74,6 @@ public class PersonService {
 
 	public void updatePerson(Long id, Person person) {
 		Person p = searchPersonForId(id);
-
 		p.setName(person.getName());
 		p.setBirthdayDate(person.getBirthdayDate());
 		p.setAdmissionDate(person.getAdmissionDate());
@@ -82,7 +81,6 @@ public class PersonService {
 	}
 
 	public void updateAtributePerson(Long id, PersonDTO personDto) {
-
 		Person p = searchPersonForId(id);
 		String convector;
 		if (personDto.getFieldName().equals(DomainFieldPerson.FIELD_NAME)){
@@ -104,14 +102,15 @@ public class PersonService {
 	}
 
 	private LocalDate convertStringToLocalDate(String str){
-		if (str.matches("\\d{4}-\\d{2}-\\d{2}")){
-			throw new DateTimeParseException("Formato data inválido, utilize o padrão (yyyy-MM-dd");
+		if (!str.matches("\\d{4}-\\d{2}-\\d{2}")){
+			throw new DateTimeParseException("Formato data inválido, utilize o padrão (yyyy-MM-dd)");
 		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		return LocalDate.parse(str, formatter);
 	}
 
-	public Long ageInDaysMonthsYears(Long id, DomainTypeDayMonthYear domain){
+	public Long ageInDaysMonthsYears(Long id, String str){
+		DomainTypeDayMonthYear domain = verifyEnumDomainTypeDayMonthYear(str);
 		Person person = searchPersonForId(id);
 		LocalDate dataAtual = LocalDate.of(2023, 2, 07);
 		if (DomainTypeDayMonthYear.DAY.equals(domain)) {
@@ -124,7 +123,17 @@ public class PersonService {
 		throw new BadRequestException("Parâmetro informado não reconhecido");
 	}
 
-	public BigDecimal salaryInFullOrMin(Long id, DomainTypeMinFull domain) throws BadRequestException {
+	private DomainTypeDayMonthYear verifyEnumDomainTypeDayMonthYear(String str){
+		for (DomainTypeDayMonthYear type : DomainTypeDayMonthYear.values()){
+			if (type.getValue().equalsIgnoreCase(str)){
+				return type;
+			}
+		}
+		throw new BadRequestException("Parâmetro informado não reconhecido");
+	}
+
+	public BigDecimal salaryInFullOrMin(Long id, String str) throws BadRequestException {
+		DomainTypeMinFull domain = verifyEnumDomainTypeMinFull(str);
 		Person person = searchPersonForId(id);
 		LocalDate dataAtual = LocalDate.of(2023, 2, 07);
 		BigDecimal salary = new BigDecimal(1558.00);
@@ -134,8 +143,15 @@ public class PersonService {
 		}
 		if (DomainTypeMinFull.FULL.equals(domain)) {
 			return salary.setScale(2, RoundingMode.UP);
-		} else if (DomainTypeMinFull.MIN.equals(domain)) {
+		} else {
 			return salary.divide(new BigDecimal("1302.00"), 2, RoundingMode.UP);
+		}
+	}
+	private DomainTypeMinFull verifyEnumDomainTypeMinFull(String str){
+		for (DomainTypeMinFull type : DomainTypeMinFull.values()){
+			if (type.getValue().equalsIgnoreCase(str)){
+				return type;
+			}
 		}
 		throw new BadRequestException("Parâmetro informado não reconhecido");
 	}

@@ -1,8 +1,8 @@
 package com.br.teste.util;
 
 public enum DomainTypeMinFull {
-	MIN(1, "Day"),
-	FULL(2, "Month");
+	MIN(1, "Min"),
+	FULL(2, "Full");
 
 	private int id;
 	private String value;

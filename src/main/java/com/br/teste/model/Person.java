@@ -15,8 +15,6 @@ public class Person {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate admissionDate;
 
-	public Person() {}
-
 	public Person (Long id, String name, LocalDate birthdayDate, LocalDate admissionDate) {
 		this.id = id;
 		this.name = name;

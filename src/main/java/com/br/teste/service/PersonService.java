@@ -13,15 +13,23 @@ import com.br.teste.util.DomainTypeMinFull;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.Collator;
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class PersonService {
@@ -54,6 +62,9 @@ public class PersonService {
 	}
 
 	public void addPersonToHash(Person person) throws ApplicationContextException {
+		if (person == null){
+			throw new PersonException("Os dados estão nulos.");
+		}
 		if (person.getId() == null) {
 			person.setId(maxKeyValue() + 1);
 			personRepository.addPerson(person);
@@ -136,7 +147,7 @@ public class PersonService {
 		DomainTypeMinFull domain = verifyEnumDomainTypeMinFull(str);
 		Person person = searchPersonForId(id);
 		LocalDate dataAtual = LocalDate.of(2023, 2, 07);
-		BigDecimal salary = new BigDecimal(1558.00);
+		BigDecimal salary = new BigDecimal("1558.00");
 		Long yearsWorked = ChronoUnit.YEARS.between(person.getAdmissionDate(), dataAtual);
 		for (int i = 0; i < yearsWorked; i++) {
 			salary = salary.add(salary.multiply(new BigDecimal("0.18"))).add(new BigDecimal("500"));
@@ -154,5 +165,37 @@ public class PersonService {
 			}
 		}
 		throw new BadRequestException("Parâmetro informado não reconhecido");
+	}
+
+	public void countNames() {
+
+		List<String> list = Arrays.asList("Pedro", "João", "Maria", "JOAO", "Alberto", "João", "MARiA");
+		List<String> listAux = new ArrayList<>();
+		TreeMap<String, Integer> names = new TreeMap<>();
+
+		for (String str : list){
+			listAux.add(removeAcentos(str).toUpperCase());
+		}
+
+		for (String str : listAux) {
+			if (names.isEmpty()){
+				names.put(str, 1);
+			} else if (names.containsKey(str)){
+				Integer count = names.get(str);
+				names.put(str,count + 1);
+			} else {
+				names.put(str,1);
+			}
+		}
+
+		names.comparator();
+		System.out.println(names);
+
+	}
+
+	private String removeAcentos(String texto) {
+		texto = Normalizer.normalize(texto, Normalizer.Form.NFD);
+		texto = texto.replaceAll("[^\\p{ASCII}]", "");
+		return texto;
 	}
 }
